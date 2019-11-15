@@ -31,11 +31,20 @@ def findImageAssetsPath(imagePath):
 		aPath = os.path.join(imagePath, aCompent)
 		if os.path.isdir(aPath):
 			if '.imageset' in aPath:
-				image_result_list = re.findall('.xcassets/.*.imageset', aPath)
+				xcassets = '.xcassets'
+				if 'cn' in aPath:
+					xcassets = '.xcassets/cn'
+				elif 'jp' in aPath:
+					xcassets = '.xcassets/jp'
+				pattern = '%s/.*.imageset'%(xcassets)
+				image_result_list = re.findall(pattern, aPath)
 				for image_result in image_result_list:
-					image_result = image_result.replace('.xcassets/', '')
+#                    print(aPath)
+					image_result = image_result.replace('%s/'%(xcassets), '')
 					if image_result not in repeat_image_list:
 						repeat_image_list.append(image_result)
+			else:
+				findImageAssetsPath(aPath)
 
 
 def findFromFile(path):
@@ -69,8 +78,8 @@ def deleteRepeatImageAtPath(repeat_image_name, path):
 	for aCompent in paths:
 		aPath = os.path.join(path, aCompent)
 		if os.path.isdir(aPath):
-			if repeat_image_name in aPath:
-				print(aPath)
+			if '/%s'%(repeat_image_name) in aPath:
+				print('repeat_image_name=%s, aPath=%s'%(repeat_image_name, aPath))
 				shutil.rmtree(aPath, ignore_errors = True)
 				break
 			else:

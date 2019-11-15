@@ -13,7 +13,7 @@ import shutil
 image_name_list = []
 string_name_list = []
 # 要搜索的路径
-find_image_path = 'UXLive/ULShareFeatures'
+find_image_path = 'UXLive/ULShareFeatures/ULGroup'
 # 主工程图片路径
 # find_main_project_image_path = 'UXLive/ULResource'
 

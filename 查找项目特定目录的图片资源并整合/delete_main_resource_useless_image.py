@@ -19,7 +19,7 @@ useless_image_list = []
 
 # 将要解析的项目名称
 DESPATH = sys.path[0]
-IMAGE_RESOURCE_PATH = sys.path[0] + "/UXLive/ULResource/Assets.xcassets"
+IMAGE_RESOURCE_PATH = sys.path[0] + "/UXLive/ULResource/ULProfilePng.xcassets"
 # RESULT_IMAGE_PATH = sys.path[0] + "/UXLive/ULShareFeatures/ULLive/Resource/ULLiveRoomPng.xcassets";
 RESULT_IMAGE_PATH = ''
 
@@ -29,18 +29,14 @@ SEPREATE = ' <=> '
 def fileNameAtPath(filePath):
     return os.path.split(filePath)[1]
 
-def findImageAssetsPath(imagePath):
-	paths = os.listdir(imagePath)
-	for aCompent in paths:
-		aPath = os.path.join(imagePath, aCompent)
-		if os.path.isdir(aPath):
-			if '.imageset' in aPath:
-				image_result_list = re.split('/', aPath)
-				for image_result in image_result_list:
-					if '.imageset' in image_result:
-						image_result_new = image_result
-						if image_result_new not in repeat_image_list:
-							repeat_image_list.append(image_result_new)
+def findImageAssetsPath(aPath):
+	if '.imageset' in aPath:
+		image_result_list = re.split('/', aPath)
+		for image_result in image_result_list:
+			if '.imageset' in image_result:
+				image_result_new = image_result
+				if image_result_new not in repeat_image_list:
+					repeat_image_list.append(image_result_new)
 
 
 def findFromFile(path):
@@ -58,12 +54,11 @@ def findAssetsImageNameFromFile(path):
 	for aCompent in paths:
 		aPath = os.path.join(path, aCompent)
 		if os.path.isdir(aPath):
-			if '.xcassets' in aPath:
+			if '.imageset' in aPath:
 				# 把图片资源记录，稍后在主工程删除对应的图片
 				findImageAssetsPath(aPath)
 			else:
 				findAssetsImageNameFromFile(aPath)
-
 
 
 def isSignalNote(str):
@@ -156,6 +151,18 @@ def deleteRepeatImageAtPath(repeat_image_name, path):
 			else:
 				deleteRepeatImageAtPath(repeat_image_name, aPath)
 
+# 给主工程总资源目录，自动删除
+def deleteRepeatImageAtMainPath(repeat_image_name, path):
+	paths = os.listdir(path)
+	for aCompent in paths:
+		aPath = os.path.join(path, aCompent)
+		if os.path.isdir(aPath):
+			if '.xcassets' in aPath:
+				# 把图片资源记录，稍后在主工程删除对应的图片
+				deleteRepeatImageAtPath(repeat_image_name, aPath)
+			else:
+				deleteRepeatImageAtMainPath(repeat_image_name, aPath)
+
 def findFromFile(path):
 	paths = os.listdir(path)
 	for aCompent in paths:
@@ -172,6 +179,7 @@ if __name__ == '__main__':
 	now_path = os.getcwd()
 	findAssetsImageNameFromFile(now_path)
 	useless_image_list = repeat_image_list.copy()
+
 	# 去主工程删除重名的图片
 	deleteRepeatImage()
 	# print(repeat_image_list)

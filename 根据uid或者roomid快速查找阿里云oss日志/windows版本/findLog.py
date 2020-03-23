@@ -207,7 +207,7 @@ def beginInput():
 			print('\033[;32m☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ 请求房间信息成功！☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆\033[0m')
 			# print('准备拉取该时间点日志...')
 			user_uid = result_dic["b"]["uid"]
-			query_timestamp = result_dic["b"]["liveStartTime"]/1000
+			query_timestamp = result_dic["b"]["actualTime"]/1000
 			ltime = time.localtime(query_timestamp)
 			user_time = time.strftime("%Y-%m-%d", ltime)
 			user_time_start = time.strftime("%Y-%m-%d %H:%M:%S", ltime)

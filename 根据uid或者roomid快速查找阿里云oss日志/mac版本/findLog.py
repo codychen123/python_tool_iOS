@@ -18,9 +18,8 @@ username = ""
 password = ""
 # 网站信息
 aliyun_login_url = 'https://signin.aliyun.com/login.htm'
-# 阿里云存储日志的列表
 aliyun_get_zipList_url = 'https://oss.console.aliyun.com/ajax/bucket/file/list_objects.json?_cacheBusting=1545129931470&bucket=klive-jp-res&region=oss-ap-northeast-1&maxKeys=100'
-aliyun_get_zip_download_url = 'http://klive-jp-res.oss-ap-northeast-1.aliyuncs.com'
+aliyun_get_zip_download_url = 'https://klive-jp-res.oss-ap-northeast-1.aliyuncs.com'
 # http://uxin-zb-picture.oss-cn-shenzhen.aliyuncs.com
 # https://oss.console.aliyun.com/ajax/bucket/file/list_objects.json?_cacheBusting=1545206862812&bucket=uxin-zb-picture&region=oss-cn-shenzhen&maxKeys=100
 
@@ -47,7 +46,7 @@ headers['Cookie'] = 'gr_user_id=a11ecd75-ae49-4853-b332-6d7ef973a8d0; Hm_lvt_603
 
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
-driver = webdriver.Chrome(chrome_options=option)
+driver = webdriver.Chrome(chrome_options=option, executable_path = './chromedriver')
 
 def loginRRD(username, password):
     try:
@@ -71,7 +70,7 @@ def loginRRD(username, password):
     except Exception as e:
         print("error")
     finally:
-        print(u'sss')
+        print(u'')
     getZip()
 
 def getZip():
@@ -99,23 +98,28 @@ def getZip():
 			ltime = time.localtime(zip_unix_time)
 			zip_time = time.strftime("%Y-%m-%d %H:%M:%S", ltime)
 			# print(load_timestamp_disparity)
-			r = requests.get('%s/%s'%(aliyun_get_zip_download_url, zip_path))
+			log_zip_download_url = '%s/%s'%(aliyun_get_zip_download_url, zip_path)
+			print(log_zip_download_url)
+			r = requests.get(log_zip_download_url)
 			with open(zip_name, "wb") as code:
 				code.write(r.content)
 			now_cwd = os.getcwd()
 			old_cwd = now_cwd + '/' + zip_name
 			new_cwd = '%s/'%zip_time
             #解压、换名、删除zip包
-			unzip_file(old_cwd, new_cwd)		
-			i += 1
-	print('已为你寻找到%s个log文件'%i)
+			try:
+				unzip_file(old_cwd, new_cwd)	
+				i += 1
+			except Exception as error:	
+				print('\033[;31m解压失败，路径%s,error:%s\033[0m'%(old_cwd, error))
+	print('\033[;32m已为你寻找到%s个log文件\033[0m'%i)
 
         
 def unzip_file(zfile_path, unzip_dir):
-    f = zipfile.ZipFile(zfile_path,'r')
-    for file in f.namelist():
-        f.extract(file,unzip_dir)
-    os.remove(zfile_path)
+	f = zipfile.ZipFile(zfile_path,'r')
+	for file in f.namelist():
+		f.extract(file,unzip_dir)
+	os.remove(zfile_path)
 
 def getTimestamp():
     global user_time
@@ -150,7 +154,7 @@ def getTimestamp():
         else:
             user_hour = user_time_to_second
     else:
-        print('☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️只有日期,没有小时，将为你拉取当天全部日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️')
+        print('\033[;32m ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️只有日期,没有小时，将为你拉取当天全部日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️\033[0m')
         data_list = user_time.split('-')
         now_year = data_list[0]
         user_month = data_list[1]
@@ -166,10 +170,10 @@ def getTimestamp():
     elif int(user_min) > 0:
         # 如果精确到分 拉取前后30分钟
         load_timestamp_disparity = query_timestamp_min
-        print('☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️将为你拉取时间点前后30分钟内的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️')
+        print('\033[;32m ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️将为你拉取时间点前后30分钟内的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️\033[0m')
     else:
         # 如果精确到小时 拉取前后2小时
-        print('☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️将为你拉取时间点前后2小时内的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️')
+        print('\033[;32m ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️将为你拉取时间点前后2小时内的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ️\033[0m')
         load_timestamp_disparity = query_timestamp_hour
     return timestamp
 
@@ -182,7 +186,7 @@ def deleteOldDir():
 			shutil.rmtree(dir_path)
 
 def beginInput():
-	print("-----请输入用户uid或者房间号roomid-----")
+	print("\033[;31m-----请输入用户uid或者房间号roomid-----\033[0m")
 	global user_uid
 	global query_timestamp
 	global user_time
@@ -194,21 +198,29 @@ def beginInput():
 		r = requests.get('%s?roomId=%s'%(pika_roomid_query_url, user_uid))
 		result_dic = json.loads(r.text)
 		if result_dic["h"]["code"] == 200:
-			print('☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ 请求房间信息成功！☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆')
-			print('准备拉取该时间点日志...')
+			print('\033[;32m☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ 请求房间信息成功！☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆\033[0m')
+			# print('准备拉取该时间点日志...')
 			user_uid = result_dic["b"]["uid"]
-			query_timestamp = result_dic["b"]["liveStartTime"]/1000
+			query_timestamp = result_dic["b"]["actualTime"]/1000
+			if 'videoUrl' in result_dic["b"]:
+				query_video_url = result_dic["b"]["videoUrl"]
+			else:
+				query_video_url = ''
 			ltime = time.localtime(query_timestamp)
 			user_time = time.strftime("%Y-%m-%d", ltime)
 			user_time_start = time.strftime("%Y-%m-%d %H:%M:%S", ltime)
 			load_timestamp_disparity = query_timestamp_hour
 			# print('%s%s%s'%(user_uid, query_timestamp, user_time))
-			print('☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ 该主播%s开播时间为%s，请查找该时间点附近的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆'%(user_uid ,user_time_start))
+			print('\033[;32m☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ 该主播\033[;31m %s \033[0m开播时间为\033[;31m %s \033[0m，请查找该时间点附近的日志 ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆ ☆\033[0m'%(user_uid ,user_time_start))
+			if len(query_video_url) > 0:
+				print('\033[;31m 回放地址为%s \033[0m'%(query_video_url))
+			else:
+				print('没有回放地址')
 		else:
-			print('roomid 信息有误，请确认')
+			print('\033[;31m roomid 信息有误，请确认\033[0m')
 			return;
 	else:
-		print("-----请输入日期（%Y-%m-%d %H:%M:%S格式例如: 2018-08-08,默认可以不用输入年份:08-08,如果只记得小时则输入 08-08 08）-----")
+		print("\033[;31m-----请输入日期（%Y-%m-%d %H:%M:%S格式例如: 2018-08-08,默认可以不用输入年份:08-08,如果只记得小时则输入 08-08 08）-----\033[0m")
 		user_time = input()
 		query_timestamp = getTimestamp()
 	loginRRD(username, password)	
@@ -236,6 +248,8 @@ def main():
 	get_parameter()
 	deleteOldDir()
 	beginInput()
+	driver.close()
+	driver.quit()
  
 if __name__ == '__main__':
     main()

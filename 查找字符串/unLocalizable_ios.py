@@ -227,8 +227,9 @@ if __name__ == '__main__':
     s = set()
     wf = open(WDESPATH, 'w+')
     wf2 = open(WDESPATH2, 'w+')
-    findFromFile(DESPATH)
-    
+#    findFromFile(DESPATH)
+    unlocalizedStrs('/Users/cody/Desktop/iOS/UXLiveOverseas/UXLive/diff.txt')
+
     for item in s:
         wf2.write(item)
     

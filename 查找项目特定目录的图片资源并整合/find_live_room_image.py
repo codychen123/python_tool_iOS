@@ -10,6 +10,7 @@ import requests
 import shutil
 
 image_name_list = []
+image_name_copy_list = []
 # 要搜索的路径
 find_image_path = 'UXLive/ULShareFeatures/ULGroup'
 # 主工程图片路径
@@ -106,6 +107,7 @@ def addImageNameToList(str):
 				image_name_list.append(iamgeset_str)
 
 def moveImageToPath():
+	image_name_copy_list = image_name_list
 	for image_name in image_name_list:
 		try:
 			findImageAssetsPath(image_name, IMAGE_RESOURCE_PATH)
@@ -148,6 +150,8 @@ def findImageAssetsPath(imageName, imagePath):
 						else:
 							shutil.move(aPath, new_path)
 							shutil.rmtree(aPath, ignore_errors = True)
+						if imageName in image_name_copy_list:
+							image_name_copy_list.remove(imageName)
 						break
 					else:
 						# 如果名称匹配不全，例如avatark_animate_ ,实际为avatark_animate_11.imageset, 进行模糊匹配，规则：参数+数字,然后对比
@@ -168,6 +172,8 @@ def findImageAssetsPath(imageName, imagePath):
 								else:
 									shutil.move(aPath, new_path)
 									shutil.rmtree(aPath, ignore_errors = True)
+								if imageName in image_name_copy_list:
+									image_name_copy_list.remove(imageName)
 							else:
 								findImageAssetsPath(imageName, aPath)
 							break
@@ -206,3 +212,4 @@ if __name__ == '__main__':
 	findFromFile(now_path)
 
 	moveImageToPath()
+	print('剩余未移除的列表/n%s'%image_name_copy_list)

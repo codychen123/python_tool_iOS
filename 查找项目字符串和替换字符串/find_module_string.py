@@ -7,9 +7,10 @@ from pypinyin import slug, Style
 import shutil
 
 # 要搜索的路径，更换路径即可
-find_str_path = 'UXLive/ULShareFeatures/ULUserProfile'
+find_str_path = 'UXLive/ULShareFeatures/ULFaceAssemble'
 
-
+# 白名单内文件不做检索
+file_white_list = ['ULCoreBaseDef.h','ULSpecialFontDownloadItem.m','ULColumnDetailModel.m','ULWechatProxy.m','ULContentDef.h','ULDownloader.m','ULScreenShotManager.h','ULLiveGiftForLottieDownLoadManager.m','Signature.h','rc4.h','ExpressionDetector.m','WBMediaCfg.m','ULFaceAssembleManager.m','UXCharacterUpdater.m','UXCharacterAVGCache.m','ULFaceAssembleDownloaderManager.m']
 # 未抽成国际化的文案
 string_name_list = set()
 # 国际化文案头部 ULString
@@ -21,7 +22,7 @@ string_name_import_head_filepath = ''
 string_bundle_path_list = []
 # 国际化文案新增,k->"ULAudioStringtiaohuifu",v->"条回复"
 string_key_list_add = {}
-# bundle Localizable文件内容,k->"ULAudioStringtiaohuifu",v->"条回复"
+# bundle Localizable文件内容,k->"ULAudioStringtiaohuifu",v->"条回复",k->"条回复",v->"ULAudioStringtiaohuifu"
 bundle_data_dict = {}
 
 def fileNameAtPath(filePath):
@@ -35,12 +36,12 @@ def is_signal_note(str):
     return False
 
 def is_log_msg(str):
-    if str.startswith('NSLog') or str.startswith('FLOG') or str.startswith('ULLog') or str.startswith('ULDebugLog') or str.startswith('ULPFunctionLog') or str.startswith('ULHttpLog') or str.startswith('ULLiveIMLog') or str.startswith('ULImageTimeLog') or str.startswith('ULPingNetLog') or str.startswith('ULMicLog') or str.startswith('ULLiveIMLog') or str.startswith('ULLiveIMLog') or str.startswith('ULVirtualModelLog') or 'NSAssert' in str:
+    if str.startswith('NSLog') or str.startswith('FLOG') or str.startswith('ULLog') or str.startswith('ULDebugLog') or str.startswith('ULPFunctionLog') or str.startswith('ULHttpLog') or str.startswith('ULLiveIMLog') or str.startswith('ULImageTimeLog') or str.startswith('ULPingNetLog') or str.startswith('ULMicLog') or str.startswith('ULLiveIMLog') or str.startswith('ULLiveIMLog') or str.startswith('ULVirtualModelLog') or 'NSAssert' in str or '@"获取苹果商品信息失败"' in str or '"购买苹果商品失败' in str or '@param ' in str or 'ULFaceAssembleLog' in str:
         return True
     return False
 
 def is_invalid_line(str):
-	if str.startswith('#i') or str.startswith('@') or str.startswith('+') or str.startswith('-') or str.startswith('}'):
+	if str.startswith('#i') or str.startswith('+') or str.startswith('-') or str.startswith('}'):
 		return True
 	return False
 
@@ -62,11 +63,12 @@ def find_str(filePath):
 			if '/*' in line or '*/' in line or is_signal_note(line2) or is_log_msg(line2) or is_invalid_line(line2):
 				file_data_list.append(line)
 				continue
-			matchList = re.findall(u'@"[\u4e00-\u9fff].*?"|@"[0-9|A-Z|a-z| |%@]+[\u4e00-\u9fff].*?"', line2)
+			matchList = re.findall(u'@"[\u4e00-\u9fff].*?"[); ,\]]|@"[0-9|A-Z|a-z| |%@]+[\u4e00-\u9fff].*?"[); ,\]]|@"[#《》&~()*\[]+.*[\u4e00-\u9fff].*?"[); ,\]]', line2)
 			if matchList:
 				need_import_string_head = True
 				for match_str in matchList:
-					match_str_no_at = match_str.replace('@"', '"')
+					match_str = str(match_str).strip(')').strip(';').strip('\]').strip(',').strip()
+					match_str_no_at = str(match_str).strip('@').strip(')').strip(';').strip()
 					trans_str = get_correct_trans_str(match_str_no_at)
 					# 已经替换过了，但是没有抽出来key
 					if string_name_head + '(' + match_str + ')' in line2:
@@ -96,7 +98,7 @@ def get_correct_trans_str(match_str):
 		# 3PH+英文/拼音概括（3代表占位符个数3个，依次类推）
 		ph_num = str(match_str).count('%@')
 		if ph_num > 0:
-			trans_pinyin_str = ph_num + 'PH' + trans_pinyin_str
+			trans_pinyin_str = str(ph_num) + 'PH' + trans_pinyin_str
 		if len(trans_pinyin_str) > 50 - len(string_name_head):
 			trans_pinyin_str = trans_pinyin_str[0:50 - len(string_name_head)]
 		trans_res_str = '"' + string_name_head + trans_pinyin_str + '"'
@@ -118,7 +120,7 @@ def find_file(path):
 		aPath = os.path.join(path, aCompent)
 		if os.path.isdir(aPath):
 			find_file(aPath)
-		elif os.path.isfile(aPath) and (os.path.splitext(aPath)[1]=='.m' or os.path.splitext(aPath)[1]=='.h'):
+		elif os.path.isfile(aPath) and (os.path.splitext(aPath)[1]=='.m' or os.path.splitext(aPath)[1]=='.h') and aPath.split('/')[-1] not in file_white_list:
 			find_str(aPath)
 
 def config_data(path):
@@ -134,12 +136,12 @@ def config_data(path):
 			# config stringkey文件信息
 			if len(string_name_import_head_filepath) <= 0 and ('StringKeyDef.h' in aPath):
 				get_string_key_data(aPath)
-		elif 'Localizable.strings' in aPath and 'String.bundle' in aPath:
+		elif 'Localizable.strings' in aPath and ('String.bundle' in path or 'Setting.bundle' in path):
 			get_bundle_path(aPath)
 
 def get_bundle_path(path):
 	string_bundle_path_list.append(path)
-	if 'KilaRes' in path and 'String.bundle' in path:
+	if 'KilaRes' in path and ('String.bundle' in path or 'Setting.bundle' in path):
 		# 以克拉为准构造dict
 		with open(path, 'r', encoding='utf-16') as f:
 			for line in f.readlines():

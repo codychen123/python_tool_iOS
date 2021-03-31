@@ -7,7 +7,7 @@ from pypinyin import slug, Style
 import shutil
 
 # 要搜索的路径，更换路径即可
-find_str_path = 'UXLive/ULShareFeatures/ULPublicBussinessModule'
+find_str_path = 'UXLive/ULShareFeatures/ULUserProfile'
 
 
 # 未抽成国际化的文案
@@ -71,6 +71,9 @@ def find_str(filePath):
 					# 已经替换过了，但是没有抽出来key
 					if string_name_head + '(' + match_str + ')' in line2:
 						line = line.replace(match_str, trans_str)
+					# ulstring
+					elif 'ULString' + '(' + match_str + ')' in line2:
+						line = line.replace('ULString' + '(' + match_str + ')', string_name_head + '(' + trans_str + ')')
 					else:
 						line = line.replace(match_str, string_name_head + '(' + trans_str + ')')
 			file_data_list.append(line)

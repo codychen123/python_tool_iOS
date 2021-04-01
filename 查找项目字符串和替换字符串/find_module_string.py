@@ -68,7 +68,7 @@ def find_str(filePath):
 				need_import_string_head = True
 				for match_str in matchList:
 					match_str = str(match_str).strip(')').strip(';').strip('\]').strip(',').strip()
-					match_str_no_at = str(match_str).strip('@').strip(')').strip(';').strip()
+					match_str_no_at = str(match_str).strip('@')
 					trans_str = get_correct_trans_str(match_str_no_at)
 					# 已经替换过了，但是没有抽出来key
 					if string_name_head + '(' + match_str + ')' in line2:
@@ -83,9 +83,11 @@ def find_str(filePath):
 	if need_import_string_head and not has_import_string_head:
 		import_line = '#import' + ' "' + string_name_import_head + '"' + '\n'
 		file_data_list.insert(import_string_line_index + 1, import_line)
-	with open(filePath, 'w') as f:
-		for line in file_data_list:
-			f.write(line)
+	if need_import_string_head:
+		with open(filePath, 'w') as f:
+			for line in file_data_list:
+				f.write(line)
+
 
 def get_correct_trans_str(match_str):
 	# 检查这个key是否已经在国际化文件里了

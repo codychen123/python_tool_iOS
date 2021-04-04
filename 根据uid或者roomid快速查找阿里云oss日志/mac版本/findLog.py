@@ -49,29 +49,35 @@ option.add_argument('headless')
 driver = webdriver.Chrome(chrome_options=option, executable_path = './chromedriver')
 
 def loginRRD(username, password):
-    try:
-        print(u'准备登陆阿里云oss...')
-        driver.get(aliyun_login_url)
-        # 用户输入界面
-        elem_user = driver.find_element_by_id("user_principal_name")
-        elem_user.send_keys(username)
-        # print(elem_user)
-        elem_user_click_next = driver.find_element_by_id("J_FormNext")
-        elem_user_click_next.click()
-        time.sleep(1)
-        # 用户密码输入界面
+	try:
+		print(u'准备登陆阿里云oss...')
+		driver.get(aliyun_login_url)
+		# 用户输入界面
+		elem_user = driver.find_element_by_id("username")
+		elem_user.send_keys(username)
+		# print(elem_user)
+		elem_user_click_list = driver.find_elements_by_class_name("next-btn-helper")
+		for elem_user_click in elem_user_click_list:
+			if elem_user_click.text == '下一步':
+				elem_user_click.click()
+				break
+		time.sleep(5)
+		# 用户密码输入界面
         #password_ims
-        elem_pwd = driver.find_element_by_id("password_ims")
-        elem_pwd.send_keys(password)
-        elem_pwd_click_next = driver.find_element_by_id("u22")
-        elem_pwd_click_next.click()
-
-        print(u'登录成功')
-    except Exception as e:
-        print("error")
-    finally:
-        print(u'')
-    getZip()
+		elem_pwd = driver.find_element_by_id("password")
+		elem_pwd.send_keys(password)
+		elem_pwd_click_list= driver.find_elements_by_class_name("next-btn-helper")
+		for elem_pwd_click in elem_pwd_click_list:
+			if elem_pwd_click.text == '登录':
+				elem_pwd_click.click()
+				break
+		print(u'登录成功')
+	except Exception as e:
+		print("error")
+	finally:
+		print(u'')
+	time.sleep(4)
+	getZip()
 
 def getZip():
 	global aliyun_get_zipList_url

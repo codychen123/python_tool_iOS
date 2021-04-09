@@ -7,7 +7,7 @@ from pypinyin import slug, Style
 import shutil
 
 # 要搜索的路径，更换路径即可
-find_str_path = 'UXLive/ULShareFeatures/ULFaceAssemble'
+find_str_path = 'UXLive/ULShareFeatures/ULVideo'
 
 # 白名单内文件不做检索
 file_white_list = ['ULCoreBaseDef.h','ULSpecialFontDownloadItem.m','ULColumnDetailModel.m','ULWechatProxy.m','ULContentDef.h','ULDownloader.m','ULScreenShotManager.h','ULLiveGiftForLottieDownLoadManager.m','Signature.h','rc4.h','ExpressionDetector.m','WBMediaCfg.m','ULFaceAssembleManager.m','UXCharacterUpdater.m','UXCharacterAVGCache.m','ULFaceAssembleDownloaderManager.m']
@@ -36,7 +36,7 @@ def is_signal_note(str):
     return False
 
 def is_log_msg(str):
-    if str.startswith('NSLog') or str.startswith('FLOG') or str.startswith('ULLog') or str.startswith('ULDebugLog') or str.startswith('ULPFunctionLog') or str.startswith('ULHttpLog') or str.startswith('ULLiveIMLog') or str.startswith('ULImageTimeLog') or str.startswith('ULPingNetLog') or str.startswith('ULMicLog') or str.startswith('ULLiveIMLog') or str.startswith('ULLiveIMLog') or str.startswith('ULVirtualModelLog') or 'NSAssert' in str or '@"获取苹果商品信息失败"' in str or '"购买苹果商品失败' in str or '@param ' in str or 'ULFaceAssembleLog' in str:
+    if str.startswith('NSLog') or str.startswith('FLOG') or str.startswith('ULLog') or str.startswith('ULDebugLog') or str.startswith('ULPFunctionLog') or str.startswith('ULHttpLog') or str.startswith('ULLiveIMLog') or str.startswith('ULImageTimeLog') or str.startswith('ULPingNetLog') or str.startswith('ULMicLog') or str.startswith('ULLiveIMLog') or str.startswith('ULLiveIMLog') or str.startswith('ULVirtualModelLog') or 'NSAssert' in str or '@"获取苹果商品信息失败"' in str or '"购买苹果商品失败' in str or '@param ' in str or 'ULFaceAssembleLog' in str or 'endLogWithMessage' in str:
         return True
     return False
 
@@ -63,7 +63,7 @@ def find_str(filePath):
 			if '/*' in line or '*/' in line or is_signal_note(line2) or is_log_msg(line2) or is_invalid_line(line2):
 				file_data_list.append(line)
 				continue
-			matchList = re.findall(u'@"[\u4e00-\u9fff].*?"[); ,\]]|@"[0-9|A-Z|a-z| |%@]+[\u4e00-\u9fff].*?"[); ,\]]|@"[#《》&~()*\[]+.*[\u4e00-\u9fff].*?"[); ,\]]', line2)
+			matchList = re.findall(u'@"[\u4e00-\u9fff].*?"[); ,\]]|@"[0-9|A-Z|a-z| |%@]+.*[\u4e00-\u9fff].*?"[); ,\]]|@"[#《》&~()*\[]+.*[\u4e00-\u9fff].*?"[); ,\]]', line2)
 			if matchList:
 				need_import_string_head = True
 				for match_str in matchList:
